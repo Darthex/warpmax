@@ -1,5 +1,4 @@
-﻿use crate::managers::asset_manager::Assets;
-use crate::managers::state_manager::State;
+﻿use crate::managers::state_manager::State;
 use crate::utilities::constants::{BUTTON_ACTION_COLOR, BUTTON_COLOR, GAME_NAME};
 use bevy::prelude::*;
 
@@ -21,7 +20,7 @@ enum MainMenuButton {
     Quit,
 }
 
-fn spawn_main_menu(mut commands: Commands, assets: Res<Assets>) {
+fn spawn_main_menu(mut commands: Commands) {
     commands
         .spawn((
             MainMenuScreen,
@@ -35,11 +34,6 @@ fn spawn_main_menu(mut commands: Commands, assets: Res<Assets>) {
                 ..default()
             },
             BackgroundColor(Color::srgba_u8(69, 69, 69, 75)),
-            ImageNode {
-                image: assets.menu_background.clone(),
-                image_mode: NodeImageMode::Auto,
-                ..default()
-            },
         ))
         .with_children(|parent| {
             parent.spawn((
