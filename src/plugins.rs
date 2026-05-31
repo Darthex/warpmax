@@ -2,6 +2,7 @@
 use crate::core::camera::CameraPlugin;
 use crate::core::window::get_window_plugin;
 use crate::managers::asset_manager::AssetManagerPlugin;
+use crate::managers::audio_manager::AudioManagerPlugin;
 use crate::managers::state_manager::StateManagerPlugin;
 use crate::scenes::main_menu_scene::MainMenuScenePlugin;
 use bevy::prelude::*;
@@ -17,6 +18,7 @@ impl Plugin for GamePlugins {
         )
         .add_plugins(StateManagerPlugin)
         .add_plugins(AssetManagerPlugin)
+        .add_plugins(AudioManagerPlugin)
         .add_plugins(CameraPlugin)
         .add_plugins(ParallaxPlugin)
         .add_plugins(MainMenuScenePlugin);

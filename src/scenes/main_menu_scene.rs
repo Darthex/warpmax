@@ -1,5 +1,6 @@
-﻿use crate::managers::state_manager::State;
-use crate::utilities::constants::{BUTTON_ACTION_COLOR, BUTTON_COLOR, GAME_NAME};
+﻿use crate::managers::asset_manager::Assets;
+use crate::managers::state_manager::State;
+use crate::utilities::constants::{BUTTON_ACTION_COLOR, BUTTON_COLOR};
 use bevy::prelude::*;
 
 pub struct MainMenuScenePlugin;
@@ -20,7 +21,7 @@ enum MainMenuButton {
     Quit,
 }
 
-fn spawn_main_menu(mut commands: Commands) {
+fn spawn_main_menu(mut commands: Commands, assets: Res<Assets>) {
     commands
         .spawn((
             MainMenuScreen,
@@ -35,13 +36,11 @@ fn spawn_main_menu(mut commands: Commands) {
             },
         ))
         .with_children(|parent| {
-            parent.spawn((
-                Text::new(GAME_NAME),
-                TextFont {
-                    font_size: 64.0,
-                    ..default()
-                },
-            ));
+            parent.spawn(Sprite {
+                image: assets.logo.clone(),
+                custom_size: Some(Vec2::new(600., 256.)),
+                ..default()
+            });
             parent.spawn((
                 MainMenuButton::Start,
                 Button,
@@ -84,7 +83,7 @@ fn button_system(
         if *interaction == Interaction::Pressed {
             match button {
                 MainMenuButton::Start => {
-                    next_state.set(State::Playing);
+                    next_state.set(State::Loading);
                 }
                 MainMenuButton::Quit => {
                     exit.write(AppExit::Success);

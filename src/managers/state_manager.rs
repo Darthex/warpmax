@@ -14,9 +14,9 @@ pub enum State {
     Initializing,
     MainMenu,
     Loading,
-    Playing,
-    Paused,
-    GameOver,
+    // Playing,
+    // Paused,
+    // GameOver,
 }
 
 fn confirmed_init(mut next_state: ResMut<NextState<State>>) {
