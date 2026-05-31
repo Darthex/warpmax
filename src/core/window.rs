@@ -1,6 +1,6 @@
 ﻿use crate::utilities::constants::{CANVAS_HEIGHT, CANVAS_WIDTH, GAME_NAME};
-use bevy::prelude::{Window, WindowPlugin, default};
-use bevy::window::{WindowResolution, WindowTheme};
+use bevy::prelude::*;
+use bevy::window::{WindowMode, WindowResolution, WindowTheme};
 
 pub fn get_window_plugin() -> WindowPlugin {
     WindowPlugin {
@@ -11,5 +11,22 @@ pub fn get_window_plugin() -> WindowPlugin {
             ..default()
         }),
         ..default()
+    }
+}
+
+pub struct LWindowPlugin;
+impl Plugin for LWindowPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, toggle_fullscreen);
+    }
+}
+
+fn toggle_fullscreen(mut window: Single<&mut Window>, keys: Res<ButtonInput<KeyCode>>) {
+    if keys.just_pressed(KeyCode::F11) {
+        if window.mode == WindowMode::Windowed {
+            window.mode = WindowMode::BorderlessFullscreen(MonitorSelection::Primary);
+        } else {
+            window.mode = WindowMode::Windowed;
+        }
     }
 }
