@@ -1,6 +1,6 @@
 ﻿use crate::managers::state_manager::State;
 use bevy::prelude::*;
-use rand::Rng;
+use rand::{Rng, RngExt};
 
 pub struct ParallaxPlugin;
 
