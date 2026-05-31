@@ -33,7 +33,6 @@ fn spawn_main_menu(mut commands: Commands) {
                 padding: UiRect::px(50., 0., 0., 50.),
                 ..default()
             },
-            BackgroundColor(Color::srgba_u8(69, 69, 69, 75)),
         ))
         .with_children(|parent| {
             parent.spawn((

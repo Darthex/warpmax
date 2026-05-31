@@ -1,4 +1,5 @@
-﻿use crate::core::camera::CameraPlugin;
+﻿use crate::components::parallax::ParallaxPlugin;
+use crate::core::camera::CameraPlugin;
 use crate::core::window::get_window_plugin;
 use crate::managers::asset_manager::AssetManagerPlugin;
 use crate::managers::state_manager::StateManagerPlugin;
@@ -17,6 +18,7 @@ impl Plugin for GamePlugins {
         .add_plugins(StateManagerPlugin)
         .add_plugins(AssetManagerPlugin)
         .add_plugins(CameraPlugin)
+        .add_plugins(ParallaxPlugin)
         .add_plugins(MainMenuScenePlugin);
     }
 }
