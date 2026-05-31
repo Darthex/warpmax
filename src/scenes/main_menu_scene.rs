@@ -22,6 +22,16 @@ enum MainMenuButton {
 }
 
 fn spawn_main_menu(mut commands: Commands, assets: Res<Assets>) {
+    commands.spawn((
+        ImageNode::new(assets.logo.clone()),
+        Node {
+            width: px(600.),
+            height: px(256.),
+            align_self: AlignSelf::Center,
+            justify_self: JustifySelf::Center,
+            ..default()
+        },
+    ));
     commands
         .spawn((
             MainMenuScreen,
@@ -36,11 +46,6 @@ fn spawn_main_menu(mut commands: Commands, assets: Res<Assets>) {
             },
         ))
         .with_children(|parent| {
-            parent.spawn(Sprite {
-                image: assets.logo.clone(),
-                custom_size: Some(Vec2::new(600., 256.)),
-                ..default()
-            });
             parent.spawn((
                 MainMenuButton::Start,
                 Button,
