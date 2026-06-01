@@ -21,6 +21,12 @@ enum MainMenuButton {
     Quit,
 }
 
+#[derive(Event)]
+pub struct ButtonHover;
+
+#[derive(Event)]
+pub struct ButtonClick;
+
 fn spawn_main_menu(mut commands: Commands, assets: Res<Assets>) {
     commands.spawn((
         ImageNode::new(assets.logo.clone()),
@@ -75,6 +81,7 @@ fn despawn_main_menu(mut commands: Commands, screen_entity: Single<Entity, With<
 
 // TODO: add pointer cursors?
 fn button_system(
+    mut commands: Commands,
     mut next_state: ResMut<NextState<State>>,
     interaction_query: Query<(&Interaction, &MainMenuButton, &mut TextColor), Changed<Interaction>>,
     mut exit: MessageWriter<AppExit>,
@@ -85,7 +92,12 @@ fn button_system(
             continue;
         }
         *text_color = BUTTON_ACTION_COLOR;
+        if *interaction == Interaction::Hovered {
+            commands.trigger(ButtonHover);
+            continue;
+        }
         if *interaction == Interaction::Pressed {
+            commands.trigger(ButtonClick);
             match button {
                 MainMenuButton::Start => {
                     next_state.set(State::Loading);
@@ -94,6 +106,7 @@ fn button_system(
                     exit.write(AppExit::Success);
                 }
             }
+            continue;
         }
     }
 }

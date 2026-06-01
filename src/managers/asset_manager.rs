@@ -12,15 +12,21 @@ pub struct Assets {
     // sprites
     pub logo: Handle<Image>,
     pub player_sprite: Handle<Image>,
+    pub cursor_sprite: Handle<Image>,
 
     //audio
     pub main_menu_bg: Handle<AudioSource>,
+    pub hover_sfx: Handle<AudioSource>,
+    pub click_sfx: Handle<AudioSource>,
 }
 
 fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(Assets {
         logo: asset_server.load("sprites/logo.png"),
         player_sprite: asset_server.load("sprites/player.png"),
+        cursor_sprite: asset_server.load("sprites/cursor.png"),
         main_menu_bg: asset_server.load("audio/mm_bg.mp3"),
+        hover_sfx: asset_server.load("audio/hover_sfx.mp3"),
+        click_sfx: asset_server.load("audio/click_sfx.mp3"),
     });
 }
