@@ -21,7 +21,8 @@ pub struct LWindowPlugin;
 impl Plugin for LWindowPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, init_cursor)
-            .add_systems(Update, toggle_fullscreen);
+            .add_systems(Update, toggle_fullscreen)
+            .add_observer(cycle_cursor);
     }
 }
 
@@ -35,12 +36,44 @@ fn toggle_fullscreen(mut window: Single<&mut Window>, keys: Res<ButtonInput<KeyC
     }
 }
 
+#[derive(Resource)]
+struct CursorIcons(Vec<CursorIcon>);
+
+pub enum CursorType {
+    Red,
+    Purple,
+}
+
+#[derive(Event)]
+pub struct CycleCursor {
+    pub type_: CursorType,
+}
+
 fn init_cursor(mut commands: Commands, window: Single<Entity, With<Window>>, assets: Res<Assets>) {
-    let c_sprite = assets.cursor_sprite.clone();
-    let c_icon = CursorIcon::Custom(CustomCursor::Image(CustomCursorImage {
-        handle: c_sprite,
-        hotspot: (0, 0),
-        ..default()
-    }));
-    commands.entity(*window).insert(c_icon);
+    let cursor_icons = CursorIcons(vec![
+        CursorIcon::Custom(CustomCursor::Image(CustomCursorImage {
+            handle: assets.cursor_red_sprite.clone(),
+            hotspot: (0, 0),
+            ..default()
+        })),
+        CursorIcon::Custom(CustomCursor::Image(CustomCursorImage {
+            handle: assets.cursor_purple_sprite.clone(),
+            hotspot: (0, 0),
+            ..default()
+        })),
+    ]);
+    commands.entity(*window).insert(cursor_icons.0[0].clone());
+    commands.insert_resource(cursor_icons);
+}
+
+fn cycle_cursor(
+    event: On<CycleCursor>,
+    mut cursor: Single<&mut CursorIcon>,
+    cursor_icons: Res<CursorIcons>,
+) {
+    let next_icon = match event.type_ {
+        CursorType::Red => &cursor_icons.0[0],
+        CursorType::Purple => &cursor_icons.0[1],
+    };
+    **cursor = next_icon.clone();
 }

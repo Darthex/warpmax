@@ -7,7 +7,7 @@ pub struct ParallaxPlugin;
 impl Plugin for ParallaxPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(State::MainMenu), spawn_stars)
-            .add_systems(Update, move_stars.run_if(in_state(State::MainMenu)));
+            .add_systems(Update, move_stars);
     }
 }
 
