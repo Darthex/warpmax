@@ -14,7 +14,7 @@ pub enum State {
     Initializing,
     MainMenu,
     Loading,
-    // Playing,
+    Playing,
     // Paused,
     // GameOver,
 }
