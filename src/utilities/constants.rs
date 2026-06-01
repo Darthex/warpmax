@@ -11,3 +11,5 @@ pub const TITLE_WIDTH: f32 = 600.;
 pub const FONT_SIZE: f32 = 32.;
 pub const BUTTON_COLOR: TextColor = TextColor(Color::srgb_u8(255, 255, 255));
 pub const BUTTON_ACTION_COLOR: TextColor = TextColor(Color::srgb_u8(211, 211, 211));
+
+pub const SOUNDTRACK_FADE_TIME: f32 = 3.0;

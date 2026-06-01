@@ -1,7 +1,7 @@
 ﻿use crate::core::window::{CursorType, CycleCursor};
 use crate::managers::asset_manager::Assets;
 use crate::managers::state_manager::State;
-use crate::utilities::animations::{ease_in_back, ease_in_out_back};
+use crate::utilities::animations::ease_in_back;
 use crate::utilities::constants::{
     BUTTON_ACTION_COLOR, BUTTON_COLOR, FONT_SIZE, TITLE_HEIGHT, TITLE_WIDTH,
 };
