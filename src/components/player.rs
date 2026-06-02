@@ -1,23 +1,20 @@
 use bevy::prelude::*;
 use crate::managers::state_manager::State;
-use crate::managers::asset_manager::Assets;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(State::Loading), spawn_player)
-            .add_systems(Update, player_movement.run_if(in_state(State::Loading)));
+        app.add_systems(OnEnter(State::Playing), spawn_player)
+            .add_systems(Update, player_movement.run_if(in_state(State::Playing)));
     }
 }
-
-
 //constant values
-const SPEED: f32 = 450.0;
 //structs & enums
 #[derive(Component)]
-struct Player;
-
+struct Player {
+    speed: f32,
+}
 
 fn spawn_player(
     mut commands: Commands,
@@ -30,7 +27,9 @@ fn spawn_player(
             ..default()
         },  
         Transform::from_translation(Vec3::ZERO),
-        Player,
+        Player {
+            speed: 600.0,
+        },
     ));
 }
 
@@ -39,9 +38,11 @@ fn spawn_player(
 fn player_movement(
     input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>, 
-    mut transform: Single<&mut Transform, With<Player>>,)
+    query: Single<(&Player, &mut Transform)>,)
 {
+    let (player, mut transform) = query.into_inner();
     let mut direction = Vec2::ZERO;
+
     if input.pressed(KeyCode::KeyW) {
         direction.y += 1.0;
     }
@@ -54,14 +55,14 @@ fn player_movement(
     if input.pressed(KeyCode::KeyD) {
         direction.x += 1.0;
     }
-    
+
     if direction != Vec2::ZERO {
-        let delta = direction.normalize() * SPEED * time.delta_secs();
-        transform.translation.x += delta.x;
-        transform.translation.y += delta.y;
+        let delta = direction.normalize() * player.speed * time.delta_secs();
+        transform.translation.x *= delta.x;
+        transform.translation.y *= delta.y;
     }
     else {
-    }  
+    }
 }
 
 
