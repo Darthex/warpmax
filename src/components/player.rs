@@ -13,7 +13,7 @@ impl Plugin for PlayerPlugin {
 
 
 //constant values
-const SPEED: f32 = 600.0;
+const SPEED: f32 = 450.0;
 //structs & enums
 #[derive(Component)]
 struct Player;
