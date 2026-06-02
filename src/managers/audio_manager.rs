@@ -73,7 +73,7 @@ fn change_track(
         }
         let next_track = match game_state.get() {
             S::MainMenu => soundtrack_player.track_list[0].clone(),
-            S::Loading => soundtrack_player.track_list[1].clone(),
+            S::Playing => soundtrack_player.track_list[1].clone(),
             _ => return,
         };
         commands.spawn((
