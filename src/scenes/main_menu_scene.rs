@@ -159,6 +159,9 @@ fn button_system(
                     title.should_animate = true;
                     commands.entity(*buttons).despawn();
                     commands.trigger(AnimatingTitle);
+                    commands.trigger(CycleCursor {
+                        type_: CursorType::Red,
+                    });
                 }
                 MainMenuButton::Quit => {
                     exit.write(AppExit::Success);
