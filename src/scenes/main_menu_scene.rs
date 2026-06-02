@@ -125,11 +125,10 @@ fn animate_title(
 
     if tt.just_finished() {
         commands.entity(entity).despawn();
-        next_state.set(State::Loading);
+        next_state.set(State::Playing);
     }
 }
 
-// TODO: add pointer cursors?
 fn button_system(
     mut commands: Commands,
     mut title: Single<&mut MainMenuTitle>,
