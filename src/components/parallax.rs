@@ -1,4 +1,5 @@
 ﻿use crate::managers::state_manager::State;
+use crate::utilities::constants::{CANVAS_HEIGHT, CANVAS_WIDTH};
 use bevy::prelude::*;
 use rand::{Rng, RngExt};
 
@@ -59,10 +60,31 @@ fn move_stars(
     window: Single<&Window>,
 ) {
     let (w, h) = (window.width(), window.height());
+    // Window dimensions become 0 when minimized — skip to avoid NaN propagation.
+    if w == 0.0 || h == 0.0 {
+        return;
+    }
+
+    // Compute the visible world dimensions, matching ScalingMode::AutoMin.
+    // AutoMin picks the scale that satisfies both minimum dimensions, so the
+    // world size is always >= CANVAS size regardless of window pixel size.
+    let scale = (w / CANVAS_WIDTH as f32).min(h / CANVAS_HEIGHT as f32);
+    let world_w = w / scale;
+    let world_h = h / scale;
+
     for (mut transform, mut star) in &mut stars {
         let speed = LAYER_SPEEDS[star.layer as usize];
-        star.norm_y -= (speed * time.delta_secs()) / h;
-        star.norm_x += (speed * time.delta_secs()) / w;
+
+        // Recover any stars corrupted by a previous minimize (NaN/infinite position).
+        if !star.norm_x.is_finite() {
+            star.norm_x = 0.5;
+        }
+        if !star.norm_y.is_finite() {
+            star.norm_y = 0.5;
+        }
+
+        star.norm_y -= (speed * time.delta_secs()) / world_h;
+        star.norm_x += (speed * time.delta_secs()) / world_w;
 
         // wrap around
         if star.norm_y < 0.0 {
@@ -72,8 +94,8 @@ fn move_stars(
             star.norm_x = 0.0;
         }
 
-        transform.translation.x = (star.norm_x - 0.5) * w;
-        transform.translation.y = (star.norm_y - 0.5) * h;
+        transform.translation.x = (star.norm_x - 0.5) * world_w;
+        transform.translation.y = (star.norm_y - 0.5) * world_h;
     }
 }
 

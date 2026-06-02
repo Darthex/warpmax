@@ -1,4 +1,4 @@
-﻿use crate::utilities::constants::{ARENA_HEIGHT, CANVAS_HEIGHT, CLEAR_COLOR};
+﻿use crate::utilities::constants::{CANVAS_HEIGHT, CANVAS_WIDTH, CLEAR_COLOR};
 use bevy::camera::ScalingMode;
 use bevy::core_pipeline::tonemapping::{DebandDither, Tonemapping};
 use bevy::post_process::bloom::Bloom;
@@ -16,8 +16,9 @@ fn setup_camera(mut commands: Commands) {
     commands.spawn((
         Camera2d,
         Projection::Orthographic(OrthographicProjection {
-            scaling_mode: ScalingMode::FixedVertical {
-                viewport_height: ARENA_HEIGHT + (CANVAS_HEIGHT - ARENA_HEIGHT as u32) as f32,
+            scaling_mode: ScalingMode::AutoMin {
+                min_width: CANVAS_WIDTH as f32,
+                min_height: CANVAS_HEIGHT as f32,
             },
             ..OrthographicProjection::default_2d()
         }),
