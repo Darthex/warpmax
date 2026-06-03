@@ -1,2 +1,2 @@
-﻿pub mod constants;
 pub mod animations;
+pub mod constants;

@@ -1,9 +1,9 @@
+mod components;
 mod core;
 mod managers;
 mod plugins;
 mod scenes;
 mod utilities;
-mod components;
 
 use crate::plugins::GamePlugins;
 use bevy::prelude::*;
