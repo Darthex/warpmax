@@ -1,9 +1,9 @@
-﻿use crate::managers::asset_manager::RingMaterial;
+use crate::managers::asset_manager::RingMaterial;
 use crate::managers::audio_manager::{PlaySfx, Sfx};
 use crate::managers::state_manager::State;
 use crate::utilities::animations::ease_in_back;
 use crate::utilities::constants::{
-    ARENA_BORDER_WIDTH, ARENA_COLOR, ARENA_HEIGHT, ARENA_WIDTH, LOADING_TIMER,
+    ARENA_BORDER_WIDTH, ARENA_COLOR, ARENA_HEIGHT, ARENA_WIDTH, COLOR_RED, LOADING_TIMER,
 };
 use bevy::prelude::*;
 
@@ -104,7 +104,7 @@ fn setup_loading(mut commands: Commands, mut materials: ResMut<Assets<RingMateri
             },
             MaterialNode(materials.add(RingMaterial {
                 progress: 1.0,
-                color: LinearRgba::new(1.0, 0.3, 0.3, 1.0),
+                color: LinearRgba::rgb(COLOR_RED.0, COLOR_RED.1, COLOR_RED.2),
             })),
             Node {
                 width: px(120.),
@@ -135,7 +135,11 @@ fn setup_loading(mut commands: Commands, mut materials: ResMut<Assets<RingMateri
                 },
                 BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.35)),
             ));
-            parent.spawn((LoadingRingText, Text(LOADING_TIMER.to_string())));
+            parent.spawn((
+                LoadingRingText,
+                Text(LOADING_TIMER.to_string()),
+                TextColor(ARENA_COLOR),
+            ));
         });
 }
 

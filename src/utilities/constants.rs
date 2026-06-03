@@ -17,7 +17,9 @@ pub const SOUNDTRACK_FADE_TIME: f32 = 3.;
 pub const ARENA_WIDTH: f32 = 1900.;
 pub const ARENA_HEIGHT: f32 = 1060.;
 pub const ARENA_BORDER_WIDTH: f32 = 2.;
-pub const ARENA_COLOR: Color = Color::linear_rgb(3.9, 0.52, 0.39);
+pub const ARENA_COLOR: Color = Color::linear_rgb(COLOR_RED.0, COLOR_RED.1, COLOR_RED.2);
 
 pub const LOADING_TIMER: u32 = 3;
 pub const CAMERA_SPEED: f32 = 8.;
+
+pub const COLOR_RED: (f32, f32, f32) = (3.9, 0.52, 0.39);
