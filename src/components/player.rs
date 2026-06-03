@@ -66,8 +66,8 @@ fn player_movement(
     if direction != Vec3::ZERO {
         let delta = direction * player.speed * time.delta_secs();
         let facing_delta = transform.rotation * delta.normalize();
-        
-        //gives player movement 
+
+        //gives player movement
         transform.translation.x += delta.x;
         transform.translation.y += delta.y;
         //gives player rotation at (direction speed = from input)
