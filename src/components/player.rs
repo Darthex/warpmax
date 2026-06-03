@@ -74,10 +74,4 @@ fn player_movement(
         transform.translation += facing_delta;
     } else {
     }
-
-    
-
-    
-
-    
 }
