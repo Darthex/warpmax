@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::managers::state_manager::State;
+use bevy::prelude::*;
 
 pub struct PlayerPlugin;
 
@@ -16,30 +16,25 @@ struct Player {
     speed: f32,
 }
 
-fn spawn_player(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,)
-{   //spawns an entity and attaches following components on top of it
+fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+    //spawns an entity and attaches following components on top of it
     commands.spawn((
         Sprite {
             custom_size: Some(Vec2::splat(50.)),
-            image: asset_server.load("sprites/player.png"),  
+            image: asset_server.load("sprites/player.png"),
             ..default()
-        },  
-        Transform::from_translation(Vec3::ZERO),
-        Player {
-            speed: 600.0,
         },
+        Transform::from_translation(Vec3::ZERO),
+        Player { speed: 600.0 },
     ));
 }
-
 
 //iterates over the Transform and AnimationState components added to Entity
 fn player_movement(
     input: Res<ButtonInput<KeyCode>>,
-    time: Res<Time>, 
-    query: Single<(&Player, &mut Transform)>,)
-{
+    time: Res<Time>,
+    query: Single<(&Player, &mut Transform)>,
+) {
     let (player, mut transform) = query.into_inner();
     let mut direction = Vec2::ZERO;
 
@@ -60,12 +55,6 @@ fn player_movement(
         let delta = direction.normalize() * player.speed * time.delta_secs();
         transform.translation.x += delta.x;
         transform.translation.y += delta.y;
-    }
-    else {
+    } else {
     }
 }
-
-
-
-
-
