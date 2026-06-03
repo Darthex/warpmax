@@ -58,8 +58,8 @@ fn player_movement(
 
     if direction != Vec2::ZERO {
         let delta = direction.normalize() * player.speed * time.delta_secs();
-        transform.translation.x *= delta.x;
-        transform.translation.y *= delta.y;
+        transform.translation.x += delta.x;
+        transform.translation.y += delta.y;
     }
     else {
     }
