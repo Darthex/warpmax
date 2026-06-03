@@ -18,3 +18,6 @@ pub const ARENA_WIDTH: f32 = 1900.;
 pub const ARENA_HEIGHT: f32 = 1060.;
 pub const ARENA_BORDER_WIDTH: f32 = 2.;
 pub const ARENA_COLOR: Color = Color::linear_rgb(3.9, 0.52, 0.39);
+
+pub const LOADING_TIMER: u32 = 3;
+pub const CAMERA_SPEED: f32 = 8.;

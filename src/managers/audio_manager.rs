@@ -1,6 +1,5 @@
 ﻿use crate::managers::asset_manager::Assets;
 use crate::managers::state_manager::State as S;
-use crate::scenes::main_menu_scene::{AnimatingTitle, ButtonClick, ButtonHover};
 use crate::utilities::constants::SOUNDTRACK_FADE_TIME;
 use bevy::audio::{PlaybackMode, Volume};
 use bevy::prelude::*;
@@ -10,9 +9,7 @@ impl Plugin for AudioManagerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, setup)
             .add_systems(Update, (change_track, fade_in, fade_out))
-            .add_observer(play_hover)
-            .add_observer(play_click)
-            .add_observer(play_whoosh);
+            .add_observer(play_sfx);
     }
 }
 
@@ -53,6 +50,15 @@ impl FadeOut {
     }
 }
 
+pub enum Sfx {
+    Hover,
+    Click,
+    Whoosh,
+}
+
+#[derive(Event)]
+pub struct PlaySfx(pub Sfx);
+
 fn setup(mut commands: Commands, assets: Res<Assets>) {
     let track_1 = assets.main_menu_bg.clone();
     let track_2 = assets.game_bg.clone();
@@ -64,7 +70,7 @@ fn setup(mut commands: Commands, assets: Res<Assets>) {
 fn change_track(
     mut commands: Commands,
     soundtrack_player: Res<SoundtrackPlayer>,
-    soundtrack: Query<Entity, With<AudioSink>>,
+    soundtrack: Query<Entity, (With<AudioSink>, Without<FadeOut>)>,
     game_state: Res<State<S>>,
 ) {
     if game_state.is_changed() {
@@ -119,23 +125,11 @@ fn fade_out(
     }
 }
 
-fn play_hover(_: On<ButtonHover>, mut commands: Commands, assets: Res<Assets>) {
-    commands.spawn((
-        AudioPlayer::new(assets.hover_sfx.clone()),
-        PlaybackSettings::DESPAWN,
-    ));
-}
-
-fn play_click(_: On<ButtonClick>, mut commands: Commands, assets: Res<Assets>) {
-    commands.spawn((
-        AudioPlayer::new(assets.click_sfx.clone()),
-        PlaybackSettings::DESPAWN,
-    ));
-}
-
-fn play_whoosh(_: On<AnimatingTitle>, mut commands: Commands, assets: Res<Assets>) {
-    commands.spawn((
-        AudioPlayer::new(assets.whoosh_sfx.clone()),
-        PlaybackSettings::DESPAWN,
-    ));
+fn play_sfx(sfx: On<PlaySfx>, mut commands: Commands, assets: Res<Assets>) {
+    let _sfx = match sfx.0 {
+        Sfx::Hover => assets.hover_sfx.clone(),
+        Sfx::Click => assets.click_sfx.clone(),
+        Sfx::Whoosh => assets.whoosh_sfx.clone(),
+    };
+    commands.spawn((AudioPlayer::new(_sfx), PlaybackSettings::DESPAWN));
 }

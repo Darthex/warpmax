@@ -1,5 +1,6 @@
 ﻿use crate::core::window::{CursorType, CycleCursor};
 use crate::managers::asset_manager::Assets;
+use crate::managers::audio_manager::{PlaySfx, Sfx};
 use crate::managers::state_manager::State;
 use crate::utilities::animations::ease_in_back;
 use crate::utilities::constants::{
@@ -32,15 +33,6 @@ enum MainMenuButton {
     Start,
     Quit,
 }
-
-#[derive(Event)]
-pub struct AnimatingTitle;
-
-#[derive(Event)]
-pub struct ButtonHover;
-
-#[derive(Event)]
-pub struct ButtonClick;
 
 fn spawn_main_menu(mut commands: Commands, assets: Res<Assets>) {
     commands.spawn((
@@ -125,7 +117,7 @@ fn animate_title(
 
     if tt.just_finished() {
         commands.entity(entity).despawn();
-        next_state.set(State::Playing);
+        next_state.set(State::Loading);
     }
 }
 
@@ -149,16 +141,16 @@ fn button_system(
             type_: CursorType::Purple,
         });
         if *interaction == Interaction::Hovered {
-            commands.trigger(ButtonHover);
+            commands.trigger(PlaySfx(Sfx::Hover));
             continue;
         }
         if *interaction == Interaction::Pressed {
-            commands.trigger(ButtonClick);
+            commands.trigger(PlaySfx(Sfx::Click));
             match button {
                 MainMenuButton::Start => {
                     title.should_animate = true;
                     commands.entity(*buttons).despawn();
-                    commands.trigger(AnimatingTitle);
+                    commands.trigger(PlaySfx(Sfx::Whoosh));
                     commands.trigger(CycleCursor {
                         type_: CursorType::Red,
                     });

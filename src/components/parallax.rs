@@ -1,4 +1,5 @@
-﻿use crate::managers::state_manager::State;
+﻿use crate::core::camera::MainCamera;
+use crate::managers::state_manager::State;
 use crate::utilities::constants::{CANVAS_HEIGHT, CANVAS_WIDTH};
 use bevy::prelude::*;
 use rand::{Rng, RngExt};
@@ -30,28 +31,32 @@ const LAYER_SIZES: [f32; 3] = [1., 2., 3.];
 const LAYER_ALPHAS: [f32; 3] = [0.15, 0.35, 0.65];
 const STARS_PER_LAYER: usize = 80;
 
-fn spawn_stars(mut commands: Commands) {
+fn spawn_stars(mut commands: Commands, camera: Single<Entity, With<MainCamera>>) {
     let mut rng = rand::rng();
+    let camera_entity = *camera;
 
-    for layer in 0u8..3 {
-        for _ in 0..STARS_PER_LAYER {
-            let size = rng
-                .random_range(LAYER_SIZES[layer as usize] * 0.5..LAYER_SIZES[layer as usize] * 1.5);
-            commands.spawn((
-                Sprite {
-                    color: random_star_color(&mut rng, layer),
-                    custom_size: Some(Vec2::splat(size)),
-                    ..default()
-                },
-                Transform::from_xyz(0., 0., -10.0 * layer as f32),
-                Star {
-                    layer,
-                    norm_x: rng.random_range(0.0..1.0),
-                    norm_y: rng.random_range(0.0..1.0),
-                },
-            ));
+    commands.entity(camera_entity).with_children(|parent| {
+        for layer in 0u8..3 {
+            for _ in 0..STARS_PER_LAYER {
+                let size = rng.random_range(
+                    LAYER_SIZES[layer as usize] * 0.5..LAYER_SIZES[layer as usize] * 1.5,
+                );
+                parent.spawn((
+                    Sprite {
+                        color: random_star_color(&mut rng, layer),
+                        custom_size: Some(Vec2::splat(size)),
+                        ..default()
+                    },
+                    Transform::from_xyz(0., 0., -10.0 * layer as f32),
+                    Star {
+                        layer,
+                        norm_x: rng.random_range(0.0..1.0),
+                        norm_y: rng.random_range(0.0..1.0),
+                    },
+                ));
+            }
         }
-    }
+    });
 }
 
 fn move_stars(
@@ -86,7 +91,7 @@ fn move_stars(
         star.norm_y -= (speed * time.delta_secs()) / world_h;
         star.norm_x += (speed * time.delta_secs()) / world_w;
 
-        // wrap around
+        // Wrap around
         if star.norm_y < 0.0 {
             star.norm_y = 1.0;
         }
