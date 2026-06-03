@@ -1,2 +1,2 @@
-﻿pub mod parallax;
+pub mod parallax;
 pub mod player;
