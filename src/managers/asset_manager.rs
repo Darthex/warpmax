@@ -1,9 +1,12 @@
 ﻿use bevy::prelude::*;
+use bevy::render::render_resource::AsBindGroup;
+use bevy::shader::ShaderRef;
 
 pub struct AssetManagerPlugin;
 impl Plugin for AssetManagerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, load_assets);
+        app.add_plugins(UiMaterialPlugin::<RingMaterial>::default())
+            .add_systems(Startup, load_assets);
     }
 }
 
@@ -35,4 +38,18 @@ fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
         click_sfx: asset_server.load("audio/click_sfx.mp3"),
         whoosh_sfx: asset_server.load("audio/whoosh_sfx.mp3"),
     });
+}
+
+#[derive(Asset, TypePath, AsBindGroup, Clone)]
+pub struct RingMaterial {
+    #[uniform(0)]
+    pub progress: f32,
+    #[uniform(1)]
+    pub color: LinearRgba,
+}
+
+impl UiMaterial for RingMaterial {
+    fn fragment_shader() -> ShaderRef {
+        "shaders/loading_ring.wgsl".into()
+    }
 }

@@ -1,8 +1,10 @@
 ﻿use crate::managers::asset_manager::Assets;
+use crate::managers::state_manager::State;
 use crate::utilities::constants::{CANVAS_HEIGHT, CANVAS_WIDTH, GAME_NAME};
 use bevy::prelude::*;
 use bevy::window::{
-    CursorIcon, CustomCursor, CustomCursorImage, WindowMode, WindowResolution, WindowTheme,
+    CursorGrabMode, CursorIcon, CursorOptions, CustomCursor, CustomCursorImage, PrimaryWindow,
+    WindowMode, WindowResolution, WindowTheme,
 };
 
 pub fn get_window_plugin() -> WindowPlugin {
@@ -22,6 +24,8 @@ impl Plugin for LWindowPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(PostStartup, init_cursor)
             .add_systems(Update, toggle_fullscreen)
+            .add_systems(OnEnter(State::Loading), cursor_grab)
+            .add_systems(OnExit(State::Playing), cursor_ungrab)
             .add_observer(cycle_cursor);
     }
 }
@@ -49,7 +53,11 @@ pub struct CycleCursor {
     pub type_: CursorType,
 }
 
-fn init_cursor(mut commands: Commands, window: Single<Entity, With<Window>>, assets: Res<Assets>) {
+fn init_cursor(
+    mut commands: Commands,
+    window: Single<Entity, With<PrimaryWindow>>,
+    assets: Res<Assets>,
+) {
     let cursor_icons = CursorIcons(vec![
         CursorIcon::Custom(CustomCursor::Image(CustomCursorImage {
             handle: assets.cursor_red_sprite.clone(),
@@ -76,4 +84,14 @@ fn cycle_cursor(
         CursorType::Purple => &cursor_icons.0[1],
     };
     **cursor = next_icon.clone();
+}
+
+fn cursor_grab(mut cursor: Single<&mut CursorOptions>) {
+    cursor.visible = false;
+    cursor.grab_mode = CursorGrabMode::Confined;
+}
+
+fn cursor_ungrab(mut cursor: Single<&mut CursorOptions>) {
+    cursor.visible = true;
+    cursor.grab_mode = CursorGrabMode::None;
 }
