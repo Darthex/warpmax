@@ -22,4 +22,8 @@ pub const ARENA_COLOR: Color = Color::linear_rgb(COLOR_RED.0, COLOR_RED.1, COLOR
 pub const LOADING_TIMER: u32 = 3;
 pub const CAMERA_SPEED: f32 = 8.;
 
+pub const PLAYER_MOVEMENT_SPEED: f32 = 1000.;
+pub const PLAYER_ROTATION_SPEED: f32 = f32::to_radians(450.0); // degrees per second
+pub const DAMPING: f32 = 3.0;
+
 pub const COLOR_RED: (f32, f32, f32) = (3.9, 0.52, 0.39);

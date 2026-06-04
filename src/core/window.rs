@@ -1,6 +1,7 @@
 ﻿use crate::managers::asset_manager::Assets;
 use crate::managers::state_manager::State;
 use crate::utilities::constants::{CANVAS_HEIGHT, CANVAS_WIDTH, GAME_NAME};
+use bevy::input::mouse::MouseMotion;
 use bevy::prelude::*;
 use bevy::window::{
     CursorGrabMode, CursorIcon, CursorOptions, CustomCursor, CustomCursorImage, PrimaryWindow,
@@ -22,7 +23,13 @@ pub fn get_window_plugin() -> WindowPlugin {
 pub struct LWindowPlugin;
 impl Plugin for LWindowPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, init_cursor)
+        app.init_resource::<VirtualCursor>()
+            .add_systems(PostStartup, init_cursor)
+            .add_systems(OnEnter(State::Playing), setup_virtual_cursor)
+            .add_systems(
+                PreUpdate,
+                update_virtual_cursor.run_if(in_state(State::Playing)),
+            )
             .add_systems(Update, toggle_fullscreen)
             .add_systems(OnEnter(State::Loading), cursor_grab)
             .add_systems(OnExit(State::Playing), cursor_ungrab)
@@ -42,6 +49,11 @@ fn toggle_fullscreen(mut window: Single<&mut Window>, keys: Res<ButtonInput<KeyC
 
 #[derive(Resource)]
 struct CursorIcons(Vec<CursorIcon>);
+
+#[derive(Resource, Default)]
+pub struct VirtualCursor {
+    pub position: Vec2,
+}
 
 pub enum CursorType {
     Red,
@@ -72,6 +84,23 @@ fn init_cursor(
     ]);
     commands.entity(*window).insert(cursor_icons.0[0].clone());
     commands.insert_resource(cursor_icons);
+}
+
+fn setup_virtual_cursor(mut cursor: ResMut<VirtualCursor>) {
+    cursor.position = Vec2::new(CANVAS_WIDTH as f32 / 2.0, CANVAS_HEIGHT as f32 / 2.0);
+}
+
+fn update_virtual_cursor(
+    mut motion: MessageReader<MouseMotion>,
+    mut cursor: ResMut<VirtualCursor>,
+    window: Single<&Window>,
+) {
+    for event in motion.read() {
+        cursor.position.x += event.delta.x;
+        cursor.position.y -= event.delta.y;
+    }
+    cursor.position.x = cursor.position.x.clamp(0.0, window.width());
+    cursor.position.y = cursor.position.y.clamp(0.0, window.height());
 }
 
 fn cycle_cursor(

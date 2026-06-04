@@ -1,11 +1,13 @@
 use crate::managers::state_manager::State;
 use crate::scenes::game_scene::ClampRadius;
 use crate::utilities::animations::ease_out_back;
-use crate::utilities::constants::{ARENA_BORDER_WIDTH, ARENA_HEIGHT, LOADING_TIMER};
+use crate::utilities::constants::{
+    ARENA_BORDER_WIDTH, ARENA_HEIGHT, DAMPING, LOADING_TIMER, PLAYER_MOVEMENT_SPEED,
+    PLAYER_ROTATION_SPEED,
+};
 use bevy::prelude::*;
 
 pub struct PlayerPlugin;
-
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(State::Loading), spawn_player)
@@ -13,16 +15,15 @@ impl Plugin for PlayerPlugin {
                 Update,
                 animate_player_entry.run_if(in_state(State::Loading)),
             )
-            .add_systems(Update, player_movement.run_if(in_state(State::Playing)));
+            .add_systems(Update, (move_player).run_if(in_state(State::Playing)));
     }
 }
 
-//structs & enums
 #[derive(Component)]
-pub struct Player {
-    speed: f32,
-    rot: f32,
-}
+pub struct Player;
+
+#[derive(Component, Default)]
+pub struct Velocity(pub Vec2);
 
 #[derive(Component)]
 struct PlayerEntryAnimation {
@@ -31,17 +32,14 @@ struct PlayerEntryAnimation {
 }
 
 fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
-    //spawns an entity and attaches following components on top of it
     commands.spawn((
         Sprite {
             custom_size: Some(Vec2::splat(40.)),
             image: asset_server.load("sprites/player.png"),
             ..default()
         },
-        Player {
-            speed: 550.0,
-            rot: f32::to_radians(450.0),
-        },
+        Player,
+        Velocity::default(),
         ClampRadius(40.),
         Transform::from_xyz(0., -ARENA_HEIGHT / 2. - ARENA_BORDER_WIDTH - 40., 0.),
         PlayerEntryAnimation {
@@ -51,49 +49,49 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-//iterates over the Transform and AnimationState components added to Entity
-fn player_movement(
+fn move_player(
     input: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
-    query: Single<(&Player, &mut Transform)>,
+    mut player: Single<(&mut Transform, &mut Velocity), With<Player>>,
 ) {
-    let (player, mut transform) = query.into_inner();
-    let mut direction = Vec3::ZERO;
-    let mut rotation = 0.0;
+    let (ref mut transform, ref mut vel) = *player;
+    let dt = time.delta_secs();
 
-    if input.pressed(KeyCode::KeyW) {
-        direction.y += 1.0;
-    }
-    if input.pressed(KeyCode::KeyS) {
-        direction.y -= 1.0;
-    }
     if input.pressed(KeyCode::KeyA) {
-        direction.x -= 1.0;
+        transform.rotate_z(PLAYER_ROTATION_SPEED * dt);
     }
     if input.pressed(KeyCode::KeyD) {
-        direction.x += 1.0;
+        transform.rotate_z(-PLAYER_ROTATION_SPEED * dt);
     }
-    if input.pressed(KeyCode::ArrowLeft) {
-        rotation += 1.0;
-    }
-    if input.pressed(KeyCode::ArrowRight) {
-        rotation -= 1.0;
-    }
-    //sets axis for rotation (current axisZ)
-    transform.rotate_z(rotation * player.rot * time.delta_secs());
 
-    if direction != Vec3::ZERO {
-        let delta = direction * player.speed * time.delta_secs();
-        let facing_delta = transform.rotation * delta.normalize();
-
-        //gives player movement
-        transform.translation.x += delta.x;
-        transform.translation.y += delta.y;
-        //gives player rotation at (direction speed = from input)
-        transform.translation += facing_delta;
-    } else {
+    let forward = transform.rotation * Vec3::Y;
+    if input.pressed(KeyCode::KeyW) {
+        vel.0 += forward.truncate() * PLAYER_MOVEMENT_SPEED;
     }
+    if input.pressed(KeyCode::KeyS) {
+        vel.0 -= forward.truncate() * PLAYER_MOVEMENT_SPEED;
+    }
+
+    vel.0 *= 1.0 - (DAMPING * dt).min(1.0);
+    vel.0 = vel.0.clamp_length_max(PLAYER_MOVEMENT_SPEED);
+
+    transform.translation.x += vel.0.x * dt;
+    transform.translation.y += vel.0.y * dt;
 }
+
+// fn rotate_player(
+//     cursor: Res<VirtualCursor>,
+//     window: Single<&Window>,
+//     mut player: Single<&mut Transform, With<Player>>,
+// ) {
+//     let screen_center = Vec2::new(window.width() / 2.0, window.height() / 2.0);
+//     let direction = cursor.position - screen_center;
+//     if direction.length() < 1.0 {
+//         return;
+//     }
+//     let angle = direction.to_angle() - FRAC_PI_2;
+//     player.rotation = Quat::from_rotation_z(angle);
+// }
 
 fn animate_player_entry(
     mut commands: Commands,
