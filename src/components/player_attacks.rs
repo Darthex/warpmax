@@ -19,18 +19,18 @@ pub struct Attacks {
     direction: Vec2,
 }
 
-pub fn attack_button(mut commands: Commands, 
-    mut meshes: ResMut<Assets<Mesh>>,  
+pub fn attack_button(mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     time: Res<Time>,
     mouse: Res<ButtonInput<MouseButton>>,
-) {    
+) {
     if mouse.pressed(MouseButton::Left) {
         commands.spawn((
             Mesh2d(meshes.add(Capsule2d::new(4.0, 4.0))),
             MeshMaterial2d(materials.add(Color::from(RED))),
             Attacks {speed: 1000.0},
-        ));  
+        ));
     } else {
     }
 }
@@ -46,10 +46,10 @@ fn aiming(
     if mouse.pressed(MouseButton::Left) {
         input.x += 1.0;
     }
-    
+
     let projectile = input * attack.speed * time.delta_secs();
     transform.translation.x += projectile.x;
     transform.translation.y += projectile.y;
-} 
+}
 
 */
