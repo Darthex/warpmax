@@ -1,0 +1,48 @@
+use bevy::prelude*;
+use crate::components::player::{player_movement, player_targeting};
+
+pub struct PlayerAttacksPlugin;
+
+impl Plugin for PlayerAttacks {
+    fn build(&self,app: mut App) {
+        app.add_systems(OnEnter(State::Playing), spawn_attacks),
+            .add_systems(Update, firing_attacks.run_if(in_State(Playing)))
+    }
+}
+
+struct Attacks {
+    attack_speed,
+}
+
+fn spawn_attacks(
+    commands.spawn((
+        let shape = [
+            meshes.add(Capsule2d::new(25.0, 50.0)),
+            Vec2::new(player_movement),
+        ]
+        Attacks {
+            attack_speed = 1000,
+        };
+    ));
+)
+
+fn firing_attacks(
+    input: RES<ButtonInput<MouseButton>>,
+    time: RES<Time>,
+    attack: Single<&mut Transform, With<Attacks>>,
+) {
+    let mut transform = attack;
+    let input = Vec2::Zero
+
+    input.pressed(MouseButton::LeftClick) {
+        input += 1.0;
+    }
+    input.pressed(MouseButton::RightClick) {
+        input += 1.0;
+    
+    attack_velocity = input * attack_speed * time.delta_secs();
+    transform.translation += attack_velocity
+    }
+}
+
+
