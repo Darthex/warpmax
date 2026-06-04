@@ -7,7 +7,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(State::Playing), spawn_player)
-            .add_systems(Update, (player_movement, player_targeting).run_if(in_state(State::Playing)));
+            .add_systems(Update, (player_movement, player_targeting).0.run_if(in_state(State::Playing)));
     }
 }
 
@@ -69,6 +69,7 @@ pub fn player_targeting(
     transform: Single<&mut Transform, With<Player>>,
 ) {
     let mut transform = transform;
+
     let (cam, cam_transform) = *camera_query;
         if let Some(cursor_position) = window.cursor_position()
             && let Ok(cursor_world_pos) = cam.viewport_to_world_2d(cam_transform, cursor_position) {
