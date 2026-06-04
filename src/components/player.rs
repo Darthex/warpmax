@@ -1,3 +1,5 @@
+use crate::managers::asset_manager::Assets;
+use crate::managers::input_manager::{ControlScheme, InputManager};
 use crate::managers::state_manager::State;
 use crate::scenes::game_scene::ClampRadius;
 use crate::utilities::animations::ease_out_back;
@@ -6,6 +8,7 @@ use crate::utilities::constants::{
     PLAYER_ROTATION_SPEED,
 };
 use bevy::prelude::*;
+use std::f32::consts::FRAC_PI_2;
 
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
@@ -31,11 +34,11 @@ struct PlayerEntryAnimation {
     start_y: Option<f32>,
 }
 
-fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_player(mut commands: Commands, assets: Res<Assets>) {
     commands.spawn((
         Sprite {
             custom_size: Some(Vec2::splat(40.)),
-            image: asset_server.load("sprites/player.png"),
+            image: assets.player_sprite.clone(),
             ..default()
         },
         Player,
@@ -50,48 +53,34 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn move_player(
-    input: Res<ButtonInput<KeyCode>>,
+    input: Res<InputManager>,
+    scheme: Res<ControlScheme>,
     time: Res<Time>,
     mut player: Single<(&mut Transform, &mut Velocity), With<Player>>,
 ) {
     let (ref mut transform, ref mut vel) = *player;
     let dt = time.delta_secs();
 
-    if input.pressed(KeyCode::KeyA) {
-        transform.rotate_z(PLAYER_ROTATION_SPEED * dt);
-    }
-    if input.pressed(KeyCode::KeyD) {
-        transform.rotate_z(-PLAYER_ROTATION_SPEED * dt);
-    }
-
-    let forward = transform.rotation * Vec3::Y;
-    if input.pressed(KeyCode::KeyW) {
-        vel.0 += forward.truncate() * PLAYER_MOVEMENT_SPEED;
-    }
-    if input.pressed(KeyCode::KeyS) {
-        vel.0 -= forward.truncate() * PLAYER_MOVEMENT_SPEED;
+    match *scheme {
+        ControlScheme::Spacecraft => {
+            transform.rotate_z(input.rotate * PLAYER_ROTATION_SPEED * dt);
+            let forward = transform.rotation * Vec3::Y;
+            vel.0 += forward.truncate() * input.thrust * PLAYER_MOVEMENT_SPEED;
+        }
+        ControlScheme::TwinStick => {
+            vel.0 += input.move_dir * PLAYER_MOVEMENT_SPEED;
+            if input.aim_dir.length() > 0.1 {
+                let target = Quat::from_rotation_z(input.aim_dir.to_angle() - FRAC_PI_2);
+                transform.rotation = transform.rotation.slerp(target, dt * 10.0);
+            }
+        }
     }
 
     vel.0 *= 1.0 - (DAMPING * dt).min(1.0);
     vel.0 = vel.0.clamp_length_max(PLAYER_MOVEMENT_SPEED);
-
     transform.translation.x += vel.0.x * dt;
     transform.translation.y += vel.0.y * dt;
 }
-
-// fn rotate_player(
-//     cursor: Res<VirtualCursor>,
-//     window: Single<&Window>,
-//     mut player: Single<&mut Transform, With<Player>>,
-// ) {
-//     let screen_center = Vec2::new(window.width() / 2.0, window.height() / 2.0);
-//     let direction = cursor.position - screen_center;
-//     if direction.length() < 1.0 {
-//         return;
-//     }
-//     let angle = direction.to_angle() - FRAC_PI_2;
-//     player.rotation = Quat::from_rotation_z(angle);
-// }
 
 fn animate_player_entry(
     mut commands: Commands,
