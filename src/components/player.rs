@@ -10,7 +10,6 @@ impl Plugin for PlayerPlugin {
             .add_systems(
                 Update,
                 (player_movement, player_targeting)
-                    .0
                     .run_if(in_state(State::Playing)),
             );
     }
