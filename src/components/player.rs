@@ -1,5 +1,5 @@
 use crate::managers::asset_manager::Assets;
-use crate::managers::input_manager::{ControlScheme, InputManager};
+use crate::managers::input_manager::InputManager;
 use crate::managers::state_manager::State;
 use crate::scenes::game_scene::ClampRadius;
 use crate::utilities::animations::ease_out_back;
@@ -54,26 +54,19 @@ fn spawn_player(mut commands: Commands, assets: Res<Assets>) {
 
 fn move_player(
     input: Res<InputManager>,
-    scheme: Res<ControlScheme>,
     time: Res<Time>,
+    mut smooth_dir: Local<Vec2>,
     mut player: Single<(&mut Transform, &mut Velocity), With<Player>>,
 ) {
     let (ref mut transform, ref mut vel) = *player;
     let dt = time.delta_secs();
 
-    match *scheme {
-        ControlScheme::Spacecraft => {
-            transform.rotate_z(input.rotate * PLAYER_ROTATION_SPEED * dt);
-            let forward = transform.rotation * Vec3::Y;
-            vel.0 += forward.truncate() * input.thrust * PLAYER_MOVEMENT_SPEED;
-        }
-        ControlScheme::TwinStick => {
-            vel.0 += input.move_dir * PLAYER_MOVEMENT_SPEED;
-            if input.aim_dir.length() > 0.1 {
-                let target = Quat::from_rotation_z(input.aim_dir.to_angle() - FRAC_PI_2);
-                transform.rotation = transform.rotation.slerp(target, dt * 10.0);
-            }
-        }
+    *smooth_dir = smooth_dir.lerp(input.move_dir, (10.0 * dt).min(1.0));
+
+    if smooth_dir.length() > 0.01 {
+        vel.0 += *smooth_dir * PLAYER_MOVEMENT_SPEED;
+        let target = Quat::from_rotation_z(smooth_dir.to_angle() - FRAC_PI_2);
+        transform.rotation = transform.rotation.slerp(target, dt * PLAYER_ROTATION_SPEED);
     }
 
     vel.0 *= 1.0 - (DAMPING * dt).min(1.0);
