@@ -1,4 +1,4 @@
-﻿use crate::core::window::VirtualCursor;
+use crate::core::window::VirtualCursor;
 use crate::managers::state_manager::State;
 use bevy::prelude::*;
 
@@ -57,7 +57,7 @@ fn read_input(
     if dir != Vec2::ZERO {
         manager.move_dir += dir.normalize();
     }
-    
+
     let screen_center = Vec2::new(window.width() / 2.0, window.height() / 2.0);
     let aim = Vec2::new(
         cursor.position.x - screen_center.x,
