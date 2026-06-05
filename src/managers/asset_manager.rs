@@ -17,6 +17,7 @@ pub struct Assets {
     pub player_sprite: Handle<Image>,
     pub cursor_red_sprite: Handle<Image>,
     pub cursor_purple_sprite: Handle<Image>,
+    pub bullet_yellow_sprite: Handle<Image>,
 
     //audio
     pub main_menu_bg: Handle<AudioSource>,
@@ -32,6 +33,7 @@ fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
         player_sprite: asset_server.load("sprites/player.png"),
         cursor_red_sprite: asset_server.load("sprites/cursor_red.png"),
         cursor_purple_sprite: asset_server.load("sprites/cursor_purple.png"),
+        bullet_yellow_sprite: asset_server.load("sprites/bullet_yellow.png"),
         main_menu_bg: asset_server.load("audio/mm_bg.mp3"),
         game_bg: asset_server.load("audio/game_bg.mp3"),
         hover_sfx: asset_server.load("audio/hover_sfx.mp3"),

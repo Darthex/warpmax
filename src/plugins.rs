@@ -1,5 +1,6 @@
 ﻿use crate::components::parallax::ParallaxPlugin;
 use crate::components::player::PlayerPlugin;
+use crate::components::projectiles::ProjectilesPlugin;
 use crate::core::camera::CameraPlugin;
 use crate::core::window::{LWindowPlugin, get_window_plugin};
 use crate::managers::asset_manager::AssetManagerPlugin;
@@ -28,6 +29,7 @@ impl Plugin for GamePlugins {
         .add_plugins(ParallaxPlugin)
         .add_plugins(MainMenuScenePlugin)
         .add_plugins(GameScenePlugin)
-        .add_plugins(PlayerPlugin);
+        .add_plugins(PlayerPlugin)
+        .add_plugins(ProjectilesPlugin);
     }
 }

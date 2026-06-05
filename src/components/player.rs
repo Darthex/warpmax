@@ -1,11 +1,12 @@
+use crate::components::projectiles::Projectile;
 use crate::managers::asset_manager::Assets;
 use crate::managers::input_manager::InputManager;
 use crate::managers::state_manager::State;
 use crate::scenes::game_scene::ClampRadius;
 use crate::utilities::animations::ease_out_back;
 use crate::utilities::constants::{
-    ARENA_BORDER_WIDTH, ARENA_HEIGHT, DAMPING, LOADING_TIMER, PLAYER_MOVEMENT_SPEED,
-    PLAYER_ROTATION_SPEED,
+    ARENA_BORDER_WIDTH, ARENA_HEIGHT, BLOOM_YELLOW, DAMPING, LOADING_TIMER, PLAYER_ATTACK_RATE,
+    PLAYER_MOVEMENT_SPEED, PLAYER_ROTATION_SPEED, PLAYER_SIZE,
 };
 use bevy::prelude::*;
 use std::f32::consts::FRAC_PI_2;
@@ -18,12 +19,18 @@ impl Plugin for PlayerPlugin {
                 Update,
                 animate_player_entry.run_if(in_state(State::Loading)),
             )
-            .add_systems(Update, (move_player).run_if(in_state(State::Playing)));
+            .add_systems(
+                Update,
+                (move_player, shoot).run_if(in_state(State::Playing)),
+            );
     }
 }
 
 #[derive(Component)]
 pub struct Player;
+
+#[derive(Component)]
+struct AttackCooldownTimer(Timer);
 
 #[derive(Component, Default)]
 pub struct Velocity(pub Vec2);
@@ -37,42 +44,20 @@ struct PlayerEntryAnimation {
 fn spawn_player(mut commands: Commands, assets: Res<Assets>) {
     commands.spawn((
         Sprite {
-            custom_size: Some(Vec2::splat(40.)),
+            custom_size: Some(Vec2::splat(PLAYER_SIZE)),
             image: assets.player_sprite.clone(),
             ..default()
         },
         Player,
+        AttackCooldownTimer(Timer::from_seconds(PLAYER_ATTACK_RATE, TimerMode::Once)),
         Velocity::default(),
-        ClampRadius(40.),
+        ClampRadius(PLAYER_SIZE),
         Transform::from_xyz(0., -ARENA_HEIGHT / 2. - ARENA_BORDER_WIDTH - 40., 0.),
         PlayerEntryAnimation {
             timer: Timer::from_seconds(LOADING_TIMER as f32, TimerMode::Once),
             start_y: None,
         },
     ));
-}
-
-fn move_player(
-    input: Res<InputManager>,
-    time: Res<Time>,
-    mut smooth_dir: Local<Vec2>,
-    mut player: Single<(&mut Transform, &mut Velocity), With<Player>>,
-) {
-    let (ref mut transform, ref mut vel) = *player;
-    let dt = time.delta_secs();
-
-    *smooth_dir = smooth_dir.lerp(input.move_dir, (10.0 * dt).min(1.0));
-
-    if smooth_dir.length() > 0.01 {
-        vel.0 += *smooth_dir * PLAYER_MOVEMENT_SPEED;
-        let target = Quat::from_rotation_z(smooth_dir.to_angle() - FRAC_PI_2);
-        transform.rotation = transform.rotation.slerp(target, dt * PLAYER_ROTATION_SPEED);
-    }
-
-    vel.0 *= 1.0 - (DAMPING * dt).min(1.0);
-    vel.0 = vel.0.clamp_length_max(PLAYER_MOVEMENT_SPEED);
-    transform.translation.x += vel.0.x * dt;
-    transform.translation.y += vel.0.y * dt;
 }
 
 fn animate_player_entry(
@@ -98,4 +83,60 @@ fn animate_player_entry(
     if entry.timer.just_finished() {
         commands.entity(entity).remove::<PlayerEntryAnimation>();
     }
+}
+
+fn move_player(
+    input: Res<InputManager>,
+    time: Res<Time>,
+    mut smooth_dir: Local<Vec2>,
+    mut player: Single<(&mut Transform, &mut Velocity), With<Player>>,
+) {
+    let (ref mut transform, ref mut vel) = *player;
+    let dt = time.delta_secs();
+
+    *smooth_dir = smooth_dir.lerp(input.move_dir, (10.0 * dt).min(1.0));
+
+    if smooth_dir.length() > 0.01 {
+        vel.0 += *smooth_dir * PLAYER_MOVEMENT_SPEED;
+        let target = Quat::from_rotation_z(smooth_dir.to_angle() - FRAC_PI_2);
+        transform.rotation = transform.rotation.slerp(target, dt * PLAYER_ROTATION_SPEED);
+    }
+
+    vel.0 *= 1.0 - (DAMPING * dt).min(1.0);
+    vel.0 = vel.0.clamp_length_max(PLAYER_MOVEMENT_SPEED);
+    transform.translation.x += vel.0.x * dt;
+    transform.translation.y += vel.0.y * dt;
+}
+
+fn shoot(
+    mut commands: Commands,
+    input: Res<InputManager>,
+    assets: Res<Assets>,
+    player: Single<(&Transform, &mut AttackCooldownTimer), With<Player>>,
+    time: Res<Time>,
+) {
+    if !input.shoot {
+        return;
+    }
+    let (transform, mut timer) = player.into_inner();
+    timer.0.tick(time.delta());
+    if !timer.0.is_finished() {
+        return;
+    }
+    timer.0.reset();
+    commands.spawn((
+        Sprite {
+            color: BLOOM_YELLOW,
+            image: assets.bullet_yellow_sprite.clone(),
+            custom_size: Some(Vec2::splat(20.)),
+            ..default()
+        },
+        Projectile {
+            speed: 4000.,
+            direction: input.aim_dir,
+            damage: 0,
+        },
+        Transform::from_xyz(transform.translation.x, transform.translation.y, 0.)
+            .with_rotation(Quat::from_rotation_z(input.aim_dir.to_angle() - FRAC_PI_2)),
+    ));
 }

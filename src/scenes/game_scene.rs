@@ -3,7 +3,7 @@ use crate::managers::audio_manager::{PlaySfx, Sfx};
 use crate::managers::state_manager::State;
 use crate::utilities::animations::ease_in_back;
 use crate::utilities::constants::{
-    ARENA_BORDER_WIDTH, ARENA_COLOR, ARENA_HEIGHT, ARENA_WIDTH, COLOR_RED, LOADING_TIMER,
+    ARENA_BORDER_WIDTH, ARENA_HEIGHT, ARENA_WIDTH, BLOOM_RED, COLOR_RED, LOADING_TIMER,
 };
 use bevy::prelude::*;
 
@@ -41,7 +41,7 @@ fn setup_arena(mut commands: Commands) {
     // Left, bottom, right, top
     commands.spawn((
         Sprite {
-            color: ARENA_COLOR,
+            color: BLOOM_RED,
             custom_size: Some(Vec2::new(
                 ARENA_BORDER_WIDTH,
                 ARENA_HEIGHT + (ARENA_BORDER_WIDTH * 2.),
@@ -52,7 +52,7 @@ fn setup_arena(mut commands: Commands) {
     ));
     commands.spawn((
         Sprite {
-            color: ARENA_COLOR,
+            color: BLOOM_RED,
             custom_size: Some(Vec2::new(
                 ARENA_WIDTH + (ARENA_BORDER_WIDTH * 2.0),
                 ARENA_BORDER_WIDTH,
@@ -63,7 +63,7 @@ fn setup_arena(mut commands: Commands) {
     ));
     commands.spawn((
         Sprite {
-            color: ARENA_COLOR,
+            color: BLOOM_RED,
             custom_size: Some(Vec2::new(
                 ARENA_BORDER_WIDTH,
                 ARENA_HEIGHT + (ARENA_BORDER_WIDTH * 2.),
@@ -74,7 +74,7 @@ fn setup_arena(mut commands: Commands) {
     ));
     commands.spawn((
         Sprite {
-            color: ARENA_COLOR,
+            color: BLOOM_RED,
             custom_size: Some(Vec2::new(
                 ARENA_WIDTH + (ARENA_BORDER_WIDTH * 2.),
                 ARENA_BORDER_WIDTH,
@@ -138,7 +138,7 @@ fn setup_loading(mut commands: Commands, mut materials: ResMut<Assets<RingMateri
             parent.spawn((
                 LoadingRingText,
                 Text(LOADING_TIMER.to_string()),
-                TextColor(ARENA_COLOR),
+                TextColor(BLOOM_RED),
             ));
         });
 }
